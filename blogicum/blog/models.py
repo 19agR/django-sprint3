@@ -1,27 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils import timezone
+
+from .querysets import PostQuerySet
 
 User = get_user_model()
-
-
-class PostQuerySet(models.QuerySet):
-    """Кастомный QuerySet для фильтрации опубликованных постов."""
-
-    def published(self):
-        """Возвращает опубликованные посты с опубликованной категорией."""
-        return self.select_related('location', 'category').filter(
-            pub_date__lte=timezone.now(),
-            is_published=True,
-            category__is_published=True,
-        )
-
-    def latest_published(self, count=5):
-        """
-        Возвращает последние 'count' опубликованных постов,
-        отсортированных по дате.
-        """
-        return self.published().order_by('-pub_date')[:count]
 
 
 class PublishedModel(models.Model):
@@ -69,7 +51,7 @@ class Category(PublishedModel):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.title
+        return self.title[:30]
 
 
 class Location(PublishedModel):
@@ -87,7 +69,7 @@ class Location(PublishedModel):
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
-        return self.name
+        return self.name[:30]
 
 
 class Post(PublishedModel):
@@ -131,6 +113,8 @@ class Post(PublishedModel):
     class Meta:
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
+        default_related_name = 'posts'
+        ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.title
+        return self.title[:30]

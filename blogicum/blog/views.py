@@ -47,10 +47,13 @@ def category_posts(request, category_slug):
         category_slug (str): Название категории.
     """
     category = get_object_or_404(
-        Category.objects.filter(slug=category_slug, is_published=True)
+        Category,
+        slug=category_slug,
+        is_published=True
     )
     post_list = Post.objects.published().filter(category=category)
     context = {
-        'category': category, 'post_list': post_list
+        'category': category,
+        'post_list': post_list
     }
     return render(request, 'blog/category.html', context)
